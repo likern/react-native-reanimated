@@ -51,7 +51,9 @@ NativeReanimatedModule::NativeReanimatedModule(std::shared_ptr<CallInvoker> jsIn
                                                std::shared_ptr<Scheduler> scheduler,
                                                std::unique_ptr<jsi::Runtime> rt,
                                                std::function<void(std::function<void(double)>)> requestRender,
-                                               std::function<void(jsi::Runtime&, int, const jsi::Object&)> propUpdater):
+                                               std::function<void(jsi::Runtime&, int, const jsi::Object&)> propUpdater,
+                                               ScrollToFunction scrollToFunction,
+                                               MeasuringFunction measuringFunction):
 NativeReanimatedModuleSpec(jsInvoker),
 runtime(std::move(rt)),
 mapperRegistry(new MapperRegistry()),
@@ -59,10 +61,17 @@ eventHandlerRegistry(new EventHandlerRegistry()),
 requestRender(requestRender),
 workletsCache(new WorkletsCache()),
 scheduler(scheduler) {
-  RuntimeDecorator::addNativeObjects(*runtime, propUpdater, [=](FrameCallback callback) {
+  auto requestAnimationFrame = [=](FrameCallback callback) {
     frameCallbacks.push_back(callback);
     maybeRequestRender();
-  });
+  };
+  
+  RuntimeDecorator::addNativeObjects(*runtime,
+                                     propUpdater,
+                                     requestAnimationFrame,
+                                     scrollToFunction,
+                                     measuringFunction
+  );
 }
 
 bool NativeReanimatedModule::isUIRuntime(jsi::Runtime &rt) {

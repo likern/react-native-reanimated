@@ -8,6 +8,7 @@
 #import "RuntimeDecorator.h"
 #import "REAModule.h"
 #import "REANodesManager.h"
+#import "RENativeMethods.h"
 
 namespace reanimated {
 
@@ -94,6 +95,15 @@ std::shared_ptr<NativeReanimatedModule> createReanimatedModule(std::shared_ptr<C
       onRender(displayLink.timestamp * 1000.0);
     }];
   };
+  
+  RCTUIManager *uiManager = reanimatedModule.nodesManager.uiManager;
+  auto measuringFunction = [uiManager](int viewTag) -> std::vector<std::pair<std::string, double>> {
+    return measure(viewTag, uiManager);
+  };
+  
+  auto scrollToFunction = [uiManager](int viewTag, double x, double y, bool animated) {
+    scrollTo(viewTag, uiManager, x, y, animated);
+  };
 
   std::shared_ptr<Scheduler> scheduler(new IOSScheduler(jsInvoker));
   std::unique_ptr<jsi::Runtime> animatedRuntime = facebook::jsc::makeJSCRuntime();
@@ -102,7 +112,10 @@ std::shared_ptr<NativeReanimatedModule> createReanimatedModule(std::shared_ptr<C
                                                                             scheduler,
                                                                             std::move(animatedRuntime),
                                                                             requestRender,
-                                                                            propUpdater));
+                                                                            propUpdater,
+                                                                            scrollToFunction,
+                                                                            measuringFunction
+                                                                            ));
 
   [reanimatedModule.nodesManager registerEventHandler:^(NSString *eventName, id<RCTEvent> event) {
     std::string eventNameString([eventName UTF8String]);
