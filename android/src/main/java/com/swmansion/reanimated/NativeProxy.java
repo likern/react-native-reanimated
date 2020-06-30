@@ -91,6 +91,15 @@ public class NativeProxy implements JSIModule, TurboModuleRegistry {
   }
 
   @DoNotStrip
+  private void scrollTo(int viewTag, double x, double y, boolean animated) {
+    mNodesManager.scrollTo(viewTag, x, y, animated);
+  }
+
+  private int[] measure(int viewTag) {
+    return mNodesManager.measure(viewTag);
+  }
+
+  @DoNotStrip
   private void registerEventHandler(EventHandler handler) {
     handler.mCustomEventNamesResolver = mNodesManager.getEventNameResolver();
     mNodesManager.registerEventHandler(handler);
