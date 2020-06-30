@@ -65,7 +65,7 @@ public class NodesManager implements EventDispatcherListener {
     NativeMethodsHelper.scrollTo(mUIManager.resolveView(viewTag), x, y, animated);
   }
 
-  public int[] measure(int viewTag) {
+  public float[] measure(int viewTag) {
     return NativeMethodsHelper.measure(mUIManager.resolveView(viewTag));
   }
 
